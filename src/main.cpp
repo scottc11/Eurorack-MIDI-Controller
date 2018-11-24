@@ -18,6 +18,7 @@ Encoder encoder3(7, 10);
 
 int CHANNEL = 1;
 bool DEBUG = false;
+bool started = false;
 
 int inputCount = 4;
 int inputPins[] = {2, 4, 5, 6};
@@ -34,6 +35,13 @@ long oldPosition3 = -999;
 
 int step = 0;
 
+
+// Start the slave device
+void startClock() {
+  Serial.write(MIDI_START);
+  started = true;
+}
+
 // Interupt Callback Function
 void sendClockPulse() {
   step += 1;
@@ -43,6 +51,8 @@ void sendClockPulse() {
     }
   }
 }
+
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -54,7 +64,7 @@ void setup() {
   }
 
   attachInterrupt(digitalPinToInterrupt(3), sendClockPulse, FALLING);
-  Serial.write(MIDI_START);
+
 
   // BUTTONS
   pinMode(2, INPUT);

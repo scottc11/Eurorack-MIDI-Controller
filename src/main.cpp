@@ -2,10 +2,12 @@
 #include <MIDI.h>
 #include <TimerOne.h>
 #include <Encoder.h>
+#include <Adafruit_MCP23017.h>
 
 
 // Created and binds the MIDI interface to the default hardware Serial port
 MIDI_CREATE_DEFAULT_INSTANCE();
+Adafruit_MCP23017 mcp = Adafruit_MCP23017();
 
 // MIDI clock, start and stop byte definitions - based on MIDI 1.0 Standards.
 #define MIDI_CLOCK 0xF8
@@ -16,14 +18,17 @@ Encoder encoder1(9, 12);
 Encoder encoder2(8, 11);
 Encoder encoder3(7, 10);
 
-int CHANNEL = 1;
-bool DEBUG = false;
+int MIDI_CHANNEL = 1;
+bool DEBUG = true;
+
+
 bool started = false;
 
-int inputCount = 4;
-int inputPins[] = {2, 4, 5, 6};
-int buttonMIDIValues[] = {21, 37, 53, 69};
-int counter[] = {0, 0, 0, 0};
+// Trigger Input Pins
+int inputCount = 3;
+int inputPins[] = {2, 4, 5};
+int buttonMIDIValues[] = {21, 37, 53};
+int counter[] = {0, 0, 0}; // for encoder ?
 
 // button states
 byte newButtonStates = 0;
@@ -35,12 +40,24 @@ long oldPosition3 = -999;
 
 int step = 0;
 
+int startNewState = 0;
+int startOldState = 0;
 
-// Start the slave device
+int stopNewState = 0;
+int stopOldState = 0;
+
+// Start the slave MIDI device
 void startClock() {
   Serial.write(MIDI_START);
   started = true;
 }
+
+// Stop the slave MIDI device
+void stopClock() {
+  Serial.write(MIDI_STOP);
+  started = false;
+}
+
 
 // Interupt Callback Function
 void sendClockPulse() {
@@ -65,6 +82,10 @@ void setup() {
 
   attachInterrupt(digitalPinToInterrupt(3), sendClockPulse, FALLING);
 
+  // mcp.begin();
+
+  // Connect MCP23017 pinouts
+  // mcp.pinMode(8, INPUT);
 
   // BUTTONS
   pinMode(2, INPUT);
@@ -74,6 +95,10 @@ void setup() {
 }
 
 void loop() {
+
+  if (digitalRead(6) == HIGH && !started) {
+    startClock();
+  }
 
   long newPosition1 = encoder1.read();
   long newPosition2 = encoder2.read();
@@ -137,10 +162,10 @@ void loop() {
       if (bitRead(newButtonStates, i) != bitRead(oldButtonStates, i)) {
         if (bitRead(newButtonStates, i) == LOW) {
           if (DEBUG) { Serial.println("HIGH"); }
-          MIDI.sendNoteOn(buttonMIDIValues[i] + counter[i], 127, CHANNEL);
+          MIDI.sendNoteOn(buttonMIDIValues[i] + counter[i], 127, MIDI_CHANNEL);
         } else {
           if (DEBUG) { Serial.println("HIGH"); }
-          MIDI.sendNoteOff(buttonMIDIValues[i] + counter[i], 0, CHANNEL);
+          MIDI.sendNoteOff(buttonMIDIValues[i] + counter[i], 0, MIDI_CHANNEL);
         }
       }
     }

@@ -7,7 +7,7 @@
 #include <Adafruit_MCP23017.h>
 
 
-// Created and binds the MIDI interface to the default hardware Serial port
+// Creates and binds the MIDI interface to the default hardware Serial port
 MIDI_CREATE_DEFAULT_INSTANCE();
 Adafruit_MCP23017 mcp = Adafruit_MCP23017();
 
@@ -21,7 +21,8 @@ Encoder encoder1(9, 12);
 Encoder encoder2(8, 11);
 Encoder encoder3(7, 10);
 // Encoder encoder4(6, 13);
-
+int MIDI_START_PIN = 4;
+int MIDI_STOP_PIN = 5;
 
 int MIDI_CHANNEL = 1;
 bool DEBUG = false;
@@ -33,16 +34,14 @@ bool started = false;
 int triggerInputCount = 4;
 int trigger_input_pins[] = {8, 9, 10, 11};  // *** MCP23017 pins
 
-int midi_start_pin = 4;
-
 int buttonMIDIValues[] = {21, 37, 53, 77};
 
 
 int counter[] = {0, 0, 0, 0}; // for encoder ?
 
 // button states
-byte newButtonStates = 0;
-byte oldButtonStates = 0;
+byte newInputStates = 0;
+byte oldInputStates = 0;
 
 long oldPosition1 = -999;
 long oldPosition2 = -999;
@@ -59,12 +58,14 @@ int stopOldState = 0;
 
 // Start the slave MIDI device
 void startClock() {
+  if (DEBUG) { Serial.println("------ START CLOCK -------"); }
   Serial.write(MIDI_START);
   started = true;
 }
 
 // Stop the slave MIDI device
 void stopClock() {
+  if (DEBUG) { Serial.println("------ STOP CLOCK -------"); }
   Serial.write(MIDI_STOP);
   started = false;
 }
@@ -74,9 +75,10 @@ void stopClock() {
 void sendClockPulse() {
   step += 1;
   if (step % 4 == 1) {
-    for (size_t i = 0; i < 24; i++) {
-      Serial.write(MIDI_CLOCK);
-    }
+    // for (size_t i = 0; i < 24; i++) {
+    //   Serial.write(MIDI_CLOCK);
+    // }
+    MIDI.sendTimeCodeQuarterFrame(DataByte inTypeNibble, DataByte inValuesNibble)
   }
 }
 
@@ -92,11 +94,11 @@ void setup() {
   }
 
   // DIGITAL PIN 3 is used for detecting tempo.
-  attachInterrupt(digitalPinToInterrupt(3), sendClockPulse, FALLING);
+  attachInterrupt(digitalPinToInterrupt(3), sendClockPulse, RISING);
 
 
-  pinMode(midi_start_pin, INPUT); // MIDI START button
-  pinMode(5, INPUT); // MIDI STOP button
+  pinMode(MIDI_START_PIN, INPUT); // MIDI START button
+  pinMode(MIDI_STOP_PIN, INPUT); // MIDI STOP button
 
   // INIT TRIGGER INPUTS
   mcp.begin();
@@ -107,9 +109,13 @@ void setup() {
 
 void loop() {
 
-  if (digitalRead(midi_start_pin) == HIGH && !started) {
+  if (digitalRead(MIDI_START_PIN) == HIGH && !started) {
     startClock();
   }
+  if (digitalRead(MIDI_STOP_PIN) == HIGH && started) {
+    stopClock();
+  }
+
 
   long newPosition1 = encoder1.read();
   long newPosition2 = encoder2.read();
@@ -175,18 +181,18 @@ void loop() {
 
 
 
-  // get switch states of each scale step
+  // get state of each input
   for (uint8_t i=0; i < triggerInputCount; i++) {
     uint8_t state = mcp.digitalRead(trigger_input_pins[i]);
-    bitWrite(newButtonStates, i, state);
+    bitWrite(newInputStates, i, state);
   }
 
-  if ( newButtonStates != oldButtonStates ) {
+  if ( newInputStates != oldInputStates ) {
 
     for (uint8_t i=0; i < triggerInputCount; i++) {
 
-      if (bitRead(newButtonStates, i) != bitRead(oldButtonStates, i)) {
-        if (bitRead(newButtonStates, i) == LOW) {
+      if (bitRead(newInputStates, i) != bitRead(oldInputStates, i)) {
+        if (bitRead(newInputStates, i) == LOW) {
           if (DEBUG) { Serial.println("HIGH"); }
           MIDI.sendNoteOn(buttonMIDIValues[i] + counter[i], 127, MIDI_CHANNEL);
         } else {
@@ -196,7 +202,7 @@ void loop() {
       }
     }
 
-    oldButtonStates = newButtonStates;
+    oldInputStates = newInputStates;
   }
 
 }

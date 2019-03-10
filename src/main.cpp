@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <MIDI.h>
 #include <Wire.h>
+#include <Adafruit_MCP23017.h>
 
 #define ENCODER_DO_NOT_USE_INTERRUPTS // so Encoder library doesn't use interupts
 #include <Encoder.h>
@@ -14,22 +15,26 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 #define MIDI_START 0xFA
 #define MIDI_STOP  0xFC
 
+#define IO_ADDR 0x00
 
-Encoder encoder1(9, 12);
+Adafruit_MCP23017 io = Adafruit_MCP23017();
+
+Encoder encoder(9, 12);
 
 
 int MIDI_START_PIN = 4;
 int MIDI_STOP_PIN = 5;
 
 int MIDI_CHANNEL = 1;
-bool DEBUG = false;
+bool DEBUG = true;
 
 
 bool started = false;
 
 // Trigger Input Pins
 int triggerInputCount = 3;
-int trigger_input_pins[] = {6, 7, 8, 5};  // *** MCP23017 pins
+int trigger_input_pins[] = {4, 5, 6, 7};
+int channel_leds[] = {0, 1, 2, 3};
 
 int buttonMIDIValues[] = {21, 37, 53, 77};
 
@@ -40,7 +45,13 @@ int counter[] = {0, 0, 0, 0}; // for encoder ?
 byte newInputStates = 0;
 byte oldInputStates = 0;
 
-long oldPosition1 = -999;
+long oldEncoderPos = -999;
+int newEndcoderPushState = 0;
+int oldEndcoderPushState = 0;
+
+
+int selected_channel = 0;   // what channel the encoder will be acting on.
+int NUM_INPUTS = 4;         // how many trigger inputs the software will accept
 
 
 int step = 0;
@@ -88,28 +99,74 @@ void setup() {
     Serial.begin(9600);
   }
 
+  io.begin(IO_ADDR);
+
+  io.pinMode(channel_leds[0], OUTPUT);
+  io.pinMode(channel_leds[1], OUTPUT);
+  io.pinMode(channel_leds[2], OUTPUT);
+  io.pinMode(channel_leds[3], OUTPUT);
+
+  io.digitalWrite(0, HIGH);
+  io.digitalWrite(2, HIGH);
+  io.digitalWrite(1, LOW);
+  io.digitalWrite(3, LOW);
+
   // INIT TRIGGER INPUTS
   for (uint8_t i = 0; i < triggerInputCount; i++) {
     pinMode(trigger_input_pins[i], INPUT);
   }
 }
 
+
+
+
+
 void loop() {
 
-  long newPosition1 = encoder1.read();
+  long newEncoderPos = encoder.read();
+
+  newEndcoderPushState = digitalRead(10);
+
+  if (newEndcoderPushState != oldEndcoderPushState) {
+
+    // if the encoder button is currently pressed down
+    if (newEndcoderPushState == HIGH) {
+      if (selected_channel == 3) {
+        selected_channel = 0;
+      } else {
+        selected_channel += 1;
+      }
+
+      for (uint8_t i = 0; i < NUM_INPUTS; i++) {
+        if (i == selected_channel) {
+          io.digitalWrite(i, HIGH);
+        } else {
+          io.digitalWrite(i, LOW);
+        }
+      }
+    }
+
+    // if the encoder button is released
+    else {
+      // do nothing
+    }
+
+    oldEndcoderPushState = newEndcoderPushState;
+    if (DEBUG) { Serial.println(selected_channel); }
+  }
 
   // ENCODER ONE
-  if (newPosition1 != oldPosition1 ) {
-    if (DEBUG) { Serial.println(newPosition1); }
+  if (newEncoderPos != oldEncoderPos ) {
+    if (DEBUG) { Serial.println(newEncoderPos); }
 
-    if (newPosition1 % 4 == 0) {
-      if (oldPosition1 > newPosition1) {
+    if (newEncoderPos % 4 == 0) {
+      if (oldEncoderPos > newEncoderPos) {
         counter[0] += 1;
       } else {
         counter[0] -= 1;
       }
     }
-    oldPosition1 = newPosition1;
+    oldEncoderPos = newEncoderPos;
   }
 
 
@@ -126,11 +183,16 @@ void loop() {
     for (uint8_t i=0; i < triggerInputCount; i++) {
 
       if (bitRead(newInputStates, i) != bitRead(oldInputStates, i)) {
-        if (bitRead(newInputStates, i) == LOW) {
-          if (DEBUG) { Serial.println("HIGH"); }
+        if (bitRead(newInputStates, i) == LOW) { // LOW means a trigger / gate has been detected
+          if (DEBUG) {
+            Serial.print("channel: "); Serial.print(i);
+            Serial.print(" -- MIDI note: "); Serial.print(buttonMIDIValues[i]);
+            Serial.print(" -- counter: "); Serial.print(counter[i]);
+            Serial.println(" ");
+          }
           MIDI.sendNoteOn(buttonMIDIValues[i] + counter[i], 127, MIDI_CHANNEL);
         } else {
-          if (DEBUG) { Serial.println("HIGH"); }
+          if (DEBUG) { Serial.println("LOW"); }
           MIDI.sendNoteOff(buttonMIDIValues[i] + counter[i], 0, MIDI_CHANNEL);
         }
       }

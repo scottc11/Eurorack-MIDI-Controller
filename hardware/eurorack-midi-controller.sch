@@ -805,6 +805,98 @@ uC used in the Arduino&lt;br&gt;
 </deviceset>
 </devicesets>
 </library>
+<library name="SparkFun-Switches">
+<description>&lt;h3&gt;SparkFun Switches, Buttons, Encoders&lt;/h3&gt;
+In this library you'll find switches, buttons, joysticks, and anything that moves to create or disrupt an electrical connection.
+&lt;br&gt;
+&lt;br&gt;
+We've spent an enormous amount of time creating and checking these footprints and parts, but it is &lt;b&gt; the end user's responsibility&lt;/b&gt; to ensure correctness and suitablity for a given componet or application. 
+&lt;br&gt;
+&lt;br&gt;If you enjoy using this library, please buy one of our products at &lt;a href=" www.sparkfun.com"&gt;SparkFun.com&lt;/a&gt;.
+&lt;br&gt;
+&lt;br&gt;
+&lt;b&gt;Licensing:&lt;/b&gt; Creative Commons ShareAlike 4.0 International - https://creativecommons.org/licenses/by-sa/4.0/ 
+&lt;br&gt;
+&lt;br&gt;
+You are welcome to use this library for commercial purposes. For attribution, we ask that when you begin to sell your device using our footprint, you email us with a link to the product being sold. We want bragging rights that we helped (in a very small part) to create your 8th world wonder. We would like the opportunity to feature your device on our homepage.</description>
+<packages>
+<package name="ROTARY_ENC_PLAIN">
+<description>&lt;h3&gt;Rotary Encoder w/ Select Switch&lt;/h3&gt;
+&lt;p&gt;Encoders rotate similarly to potentiometers, but they’re different from potentiometers in that an encoder has full rotation without limits. They output gray code so that you can tell how much and in which direction the encoder has been turned.&lt;/p&gt;
+&lt;p&gt;This encoder includes a push-down select switch built into the shaft.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.sparkfun.com/datasheets/Components/TW-700198.pdf"&gt;Datasheet&lt;/a&gt;&lt;/p&gt;</description>
+<pad name="C" x="7.493" y="0" drill="1.016"/>
+<pad name="SW+" x="-6.985" y="2.54" drill="1.016"/>
+<pad name="P$3" x="0" y="6.604" drill="2.286"/>
+<pad name="P$4" x="0" y="-6.604" drill="2.286"/>
+<pad name="SW-" x="-6.985" y="-2.54" drill="1.016"/>
+<pad name="B" x="7.493" y="2.54" drill="1.016"/>
+<pad name="A" x="7.493" y="-2.54" drill="1.016"/>
+<wire x1="-6.35" y1="6.35" x2="-2.54" y2="6.35" width="0.2032" layer="21"/>
+<wire x1="2.54" y1="6.35" x2="6.35" y2="6.35" width="0.2032" layer="21"/>
+<wire x1="6.35" y1="6.35" x2="6.35" y2="-6.35" width="0.2032" layer="21"/>
+<wire x1="6.35" y1="-6.35" x2="2.54" y2="-6.35" width="0.2032" layer="21"/>
+<wire x1="-2.54" y1="-6.35" x2="-6.35" y2="-6.35" width="0.2032" layer="21"/>
+<wire x1="-6.35" y1="-6.35" x2="-6.35" y2="-3.81" width="0.2032" layer="21"/>
+<wire x1="-6.35" y1="6.35" x2="-6.35" y2="3.81" width="0.2032" layer="21"/>
+<wire x1="-6.35" y1="1.27" x2="-6.35" y2="-1.27" width="0.2032" layer="21"/>
+<text x="5.08" y="6.477" size="0.6096" layer="25" font="vector" ratio="20" align="bottom-center">&gt;Name</text>
+<text x="5.08" y="-6.477" size="0.6096" layer="27" font="vector" ratio="20" align="top-center">&gt;Value</text>
+</package>
+</packages>
+<symbols>
+<symbol name="ROT_ENCODER">
+<description>&lt;h3&gt;Rotary Encoder w/ Select Switch&lt;/h3&gt;
+&lt;p&gt;Encoders rotate similarly to potentiometers, but they’re different from potentiometers in that an encoder has full rotation without limits. They output gray code so that you can tell how much and in which direction the encoder has been turned.&lt;/p&gt;</description>
+<pin name="SW+" x="-10.16" y="5.08" visible="off" length="middle"/>
+<pin name="SW-" x="-10.16" y="-5.08" visible="off" length="middle"/>
+<pin name="B" x="10.16" y="5.08" visible="pin" length="middle" rot="R180"/>
+<pin name="C" x="10.16" y="0" visible="pin" length="middle" rot="R180"/>
+<pin name="A" x="10.16" y="-5.08" visible="pin" length="middle" rot="R180"/>
+<wire x1="-5.08" y1="5.08" x2="-2.54" y2="5.08" width="0.1524" layer="94"/>
+<wire x1="-2.54" y1="5.08" x2="-2.54" y2="2.54" width="0.1524" layer="94"/>
+<wire x1="-2.54" y1="2.54" x2="-1.524" y2="-2.54" width="0.1524" layer="94"/>
+<wire x1="-5.08" y1="-5.08" x2="-2.54" y2="-5.08" width="0.1524" layer="94"/>
+<wire x1="-2.54" y1="-5.08" x2="-2.54" y2="-1.778" width="0.1524" layer="94"/>
+<wire x1="-7.62" y1="7.62" x2="7.62" y2="7.62" width="0.254" layer="94"/>
+<wire x1="7.62" y1="7.62" x2="7.62" y2="-7.62" width="0.254" layer="94"/>
+<wire x1="7.62" y1="-7.62" x2="-7.62" y2="-7.62" width="0.254" layer="94"/>
+<wire x1="-7.62" y1="-7.62" x2="-7.62" y2="7.62" width="0.254" layer="94"/>
+<text x="-7.62" y="7.874" size="1.778" layer="95" font="vector">&gt;NAME</text>
+<text x="-7.62" y="-7.874" size="1.778" layer="96" font="vector" align="top-left">&gt;VALUE</text>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="ENCODER-SWITCH" prefix="S">
+<description>&lt;h3&gt;Rotary Encoder w/ Select Switch&lt;/h3&gt;
+&lt;p&gt;Encoders rotate similarly to potentiometers, but they’re different from potentiometers in that an encoder has full rotation without limits. They output gray code so that you can tell how much and in which direction the encoder has been turned.&lt;/p&gt;
+&lt;p&gt;This encoder includes a push-down select switch built into the shaft.&lt;/p&gt;
+&lt;h4&gt;SparkFun Products&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.sparkfun.com/products/9117"&gt;Rotary Encoder&lt;/a&gt; (COM-09117)&lt;/li&gt;
+&lt;/ul&gt;</description>
+<gates>
+<gate name="G$1" symbol="ROT_ENCODER" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="ROTARY_ENC_PLAIN">
+<connects>
+<connect gate="G$1" pin="A" pad="A"/>
+<connect gate="G$1" pin="B" pad="B"/>
+<connect gate="G$1" pin="C" pad="C"/>
+<connect gate="G$1" pin="SW+" pad="SW+"/>
+<connect gate="G$1" pin="SW-" pad="SW-"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="SF_SKU" value="COM-09117"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -825,6 +917,15 @@ uC used in the Arduino&lt;br&gt;
 <part name="U$3" library="ESSY" deviceset="PWR" device="" value="+5V"/>
 <part name="U2" library="SparkFun-IC-Microcontroller" deviceset="ATMEGA328P_PDIP" device="" value="328P"/>
 <part name="MCP1" library="ESSY" deviceset="MCP23017_DIP" device=""/>
+<part name="U$4" library="ESSY" deviceset="PWR" device="" value="+5V"/>
+<part name="U$5" library="ESSY" deviceset="GND" device=""/>
+<part name="U$6" library="ESSY" deviceset="GND" device=""/>
+<part name="R4" library="ESSY" deviceset="RESISTOR_HORZ" device="" value="10K"/>
+<part name="U$7" library="ESSY" deviceset="PWR" device="" value="+5V"/>
+<part name="S1" library="SparkFun-Switches" deviceset="ENCODER-SWITCH" device=""/>
+<part name="U$8" library="ESSY" deviceset="PWR" device="" value="+5V"/>
+<part name="U$9" library="ESSY" deviceset="GND" device=""/>
+<part name="R5" library="ESSY" deviceset="RESISTOR_HORZ" device="" value="10K"/>
 </parts>
 <sheets>
 <sheet>
@@ -841,6 +942,15 @@ uC used in the Arduino&lt;br&gt;
 <instance part="U$3" gate="G$1" x="-15.24" y="91.44"/>
 <instance part="U2" gate="U1" x="93.98" y="58.42"/>
 <instance part="MCP1" gate="G$1" x="116.84" y="-35.56"/>
+<instance part="U$4" gate="G$1" x="60.96" y="-35.56" rot="R90"/>
+<instance part="U$5" gate="G$1" x="48.26" y="-38.1" rot="R270"/>
+<instance part="U$6" gate="G$1" x="129.54" y="-48.26" rot="R90"/>
+<instance part="R4" gate="G$1" x="132.08" y="-40.64"/>
+<instance part="U$7" gate="G$1" x="142.24" y="-40.64" rot="R270"/>
+<instance part="S1" gate="G$1" x="190.5" y="50.8"/>
+<instance part="U$8" gate="G$1" x="172.72" y="55.88" rot="R90"/>
+<instance part="U$9" gate="G$1" x="170.18" y="25.4"/>
+<instance part="R5" gate="G$1" x="170.18" y="35.56" rot="R90"/>
 </instances>
 <busses>
 </busses>
@@ -855,6 +965,31 @@ uC used in the Arduino&lt;br&gt;
 <pinref part="Q1" gate="G$1" pin="E"/>
 <pinref part="U$1" gate="G$1" pin="3.3V"/>
 <wire x1="-15.24" y1="53.34" x2="-15.24" y2="45.72" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="MCP1" gate="G$1" pin="GND"/>
+<pinref part="U$5" gate="G$1" pin="3.3V"/>
+<wire x1="76.2" y1="-38.1" x2="50.8" y2="-38.1" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="MCP1" gate="G$1" pin="A0"/>
+<pinref part="U$6" gate="G$1" pin="3.3V"/>
+<wire x1="109.22" y1="-48.26" x2="116.84" y2="-48.26" width="0.1524" layer="91"/>
+<pinref part="MCP1" gate="G$1" pin="A1"/>
+<wire x1="116.84" y1="-48.26" x2="119.38" y2="-48.26" width="0.1524" layer="91"/>
+<wire x1="119.38" y1="-48.26" x2="127" y2="-48.26" width="0.1524" layer="91"/>
+<wire x1="109.22" y1="-45.72" x2="116.84" y2="-45.72" width="0.1524" layer="91"/>
+<wire x1="116.84" y1="-45.72" x2="116.84" y2="-48.26" width="0.1524" layer="91"/>
+<junction x="116.84" y="-48.26"/>
+<pinref part="MCP1" gate="G$1" pin="A2"/>
+<wire x1="109.22" y1="-43.18" x2="119.38" y2="-43.18" width="0.1524" layer="91"/>
+<wire x1="119.38" y1="-43.18" x2="119.38" y2="-48.26" width="0.1524" layer="91"/>
+<junction x="119.38" y="-48.26"/>
+</segment>
+<segment>
+<pinref part="R5" gate="G$1" pin="1"/>
+<pinref part="U$9" gate="G$1" pin="3.3V"/>
+<wire x1="170.18" y1="30.48" x2="170.18" y2="27.94" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$1" class="0">
@@ -888,6 +1023,21 @@ uC used in the Arduino&lt;br&gt;
 <pinref part="U$3" gate="G$1" pin="5V"/>
 <wire x1="-15.24" y1="83.82" x2="-15.24" y2="91.44" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<pinref part="MCP1" gate="G$1" pin="POWER"/>
+<pinref part="U$4" gate="G$1" pin="5V"/>
+<wire x1="76.2" y1="-35.56" x2="60.96" y2="-35.56" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="U$7" gate="G$1" pin="5V"/>
+<pinref part="R4" gate="G$1" pin="2"/>
+<wire x1="142.24" y1="-40.64" x2="137.16" y2="-40.64" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="S1" gate="G$1" pin="SW+"/>
+<pinref part="U$8" gate="G$1" pin="5V"/>
+<wire x1="180.34" y1="55.88" x2="172.72" y2="55.88" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="TRIG_IN_A" class="0">
 <segment>
@@ -899,6 +1049,24 @@ uC used in the Arduino&lt;br&gt;
 <pinref part="U2" gate="U1" pin="PD2(INT0)"/>
 <wire x1="116.84" y1="55.88" x2="121.92" y2="55.88" width="0.1524" layer="91"/>
 <label x="121.92" y="55.88" size="1.016" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="N$6" class="0">
+<segment>
+<pinref part="R4" gate="G$1" pin="1"/>
+<pinref part="MCP1" gate="G$1" pin="RESET"/>
+<wire x1="127" y1="-40.64" x2="109.22" y2="-40.64" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="ENCODER_SWITCH" class="0">
+<segment>
+<pinref part="S1" gate="G$1" pin="SW-"/>
+<wire x1="180.34" y1="45.72" x2="170.18" y2="45.72" width="0.1524" layer="91"/>
+<pinref part="R5" gate="G$1" pin="2"/>
+<wire x1="170.18" y1="45.72" x2="170.18" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="170.18" y1="45.72" x2="160.02" y2="45.72" width="0.1524" layer="91"/>
+<junction x="170.18" y="45.72"/>
+<label x="160.02" y="45.72" size="1.016" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 </nets>

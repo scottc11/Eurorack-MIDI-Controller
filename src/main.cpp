@@ -26,7 +26,7 @@ int MIDI_START_PIN = 4;
 int MIDI_STOP_PIN = 5;
 
 int MIDI_CHANNEL = 1;
-bool DEBUG = true;
+bool DEBUG = false;
 
 
 bool started = false;
@@ -36,7 +36,7 @@ int triggerInputCount = 3;
 int trigger_input_pins[] = {4, 5, 6, 7};
 int channel_leds[] = {0, 1, 2, 3};
 
-int buttonMIDIValues[] = {21, 37, 53, 77};
+int triggerMIDIValues[] = {21, 37, 53, 77};
 
 
 int counter[] = {0, 0, 0, 0}; // for encoder ?
@@ -50,8 +50,8 @@ int newEndcoderPushState = 0;
 int oldEndcoderPushState = 0;
 
 
-int selected_channel = 0;   // what channel the encoder will be acting on.
-int NUM_INPUTS = 4;         // how many trigger inputs the software will accept
+int selected_trigger = 0;        // what trigger the encoder will be acting on.
+int NUM_TRIG_INPUTS = 4;         // how many trigger inputs the software will accept
 
 
 int step = 0;
@@ -101,15 +101,16 @@ void setup() {
 
   io.begin(IO_ADDR);
 
-  io.pinMode(channel_leds[0], OUTPUT);
-  io.pinMode(channel_leds[1], OUTPUT);
-  io.pinMode(channel_leds[2], OUTPUT);
-  io.pinMode(channel_leds[3], OUTPUT);
+  // init IO LEDS
+  for (uint8_t i = 0; i < NUM_TRIG_INPUTS; i++) {
+    io.pinMode(channel_leds[i], OUTPUT);
 
-  io.digitalWrite(0, HIGH);
-  io.digitalWrite(2, HIGH);
-  io.digitalWrite(1, LOW);
-  io.digitalWrite(3, LOW);
+    if (i == selected_trigger) {
+      io.digitalWrite(channel_leds[i], HIGH);
+    } else {
+      io.digitalWrite(channel_leds[i], LOW);
+    }
+  }
 
   // INIT TRIGGER INPUTS
   for (uint8_t i = 0; i < triggerInputCount; i++) {
@@ -131,19 +132,20 @@ void loop() {
 
     // if the encoder button is currently pressed down
     if (newEndcoderPushState == HIGH) {
-      if (selected_channel == 3) {
-        selected_channel = 0;
+      if (selected_trigger == 3) {
+        selected_trigger = 0;
       } else {
-        selected_channel += 1;
+        selected_trigger += 1;
       }
 
-      for (uint8_t i = 0; i < NUM_INPUTS; i++) {
-        if (i == selected_channel) {
+      for (uint8_t i = 0; i < NUM_TRIG_INPUTS; i++) {
+        if (i == selected_trigger) {
           io.digitalWrite(i, HIGH);
         } else {
           io.digitalWrite(i, LOW);
         }
       }
+      if (DEBUG) { Serial.println(selected_trigger); }
     }
 
     // if the encoder button is released
@@ -152,7 +154,6 @@ void loop() {
     }
 
     oldEndcoderPushState = newEndcoderPushState;
-    if (DEBUG) { Serial.println(selected_channel); }
   }
 
   // ENCODER ONE
@@ -161,9 +162,11 @@ void loop() {
 
     if (newEncoderPos % 4 == 0) {
       if (oldEncoderPos > newEncoderPos) {
-        counter[0] += 1;
+        counter[selected_trigger] += 1;
+        triggerMIDIValues[selected_trigger] += 1;
       } else {
-        counter[0] -= 1;
+        counter[selected_trigger] -= 1;
+        triggerMIDIValues[selected_trigger] -= 1;
       }
     }
     oldEncoderPos = newEncoderPos;
@@ -186,14 +189,13 @@ void loop() {
         if (bitRead(newInputStates, i) == LOW) { // LOW means a trigger / gate has been detected
           if (DEBUG) {
             Serial.print("channel: "); Serial.print(i);
-            Serial.print(" -- MIDI note: "); Serial.print(buttonMIDIValues[i]);
-            Serial.print(" -- counter: "); Serial.print(counter[i]);
+            Serial.print(" -- MIDI note: "); Serial.print(triggerMIDIValues[i]);
             Serial.println(" ");
           }
-          MIDI.sendNoteOn(buttonMIDIValues[i] + counter[i], 127, MIDI_CHANNEL);
+          MIDI.sendNoteOn(triggerMIDIValues[i], 127, MIDI_CHANNEL);
         } else {
           if (DEBUG) { Serial.println("LOW"); }
-          MIDI.sendNoteOff(buttonMIDIValues[i] + counter[i], 0, MIDI_CHANNEL);
+          MIDI.sendNoteOff(triggerMIDIValues[i], 0, MIDI_CHANNEL);
         }
       }
     }

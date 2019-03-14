@@ -2,6 +2,7 @@
 #include <MIDI.h>
 #include <Wire.h>
 #include <Adafruit_MCP23017.h>
+#include <TimerOne.h>
 
 #define ENCODER_DO_NOT_USE_INTERRUPTS // so Encoder library doesn't use interupts
 #include <Encoder.h>
@@ -14,22 +15,18 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 #define MIDI_CLOCK 0xF8
 #define MIDI_START 0xFA
 #define MIDI_STOP  0xFC
+#define PPQ 24
 
 #define IO_ADDR 0x00
+
+const int MIDI_START_PIN = 8;
+const int MIDI_STOP_PIN = 9;
+const int MIDI_CHANNEL = 1;
+const bool DEBUG = false;
 
 Adafruit_MCP23017 io = Adafruit_MCP23017();
 
 Encoder encoder(9, 12);
-
-
-int MIDI_START_PIN = 4;
-int MIDI_STOP_PIN = 5;
-
-int MIDI_CHANNEL = 1;
-bool DEBUG = false;
-
-
-bool started = false;
 
 // Trigger Input Pins
 int triggerInputCount = 3;
@@ -37,7 +34,6 @@ int trigger_input_pins[] = {4, 5, 6, 7};
 int channel_leds[] = {0, 1, 2, 3};
 
 int triggerMIDIValues[] = {21, 37, 53, 77};
-
 
 int counter[] = {0, 0, 0, 0}; // for encoder ?
 
@@ -53,8 +49,7 @@ int oldEndcoderPushState = 0;
 int selected_trigger = 0;        // what trigger the encoder will be acting on.
 int NUM_TRIG_INPUTS = 4;         // how many trigger inputs the software will accept
 
-
-int step = 0;
+bool started = false;  // tell MIDI slave to advance
 
 int startNewState = 0;
 int startOldState = 0;
@@ -62,30 +57,56 @@ int startOldState = 0;
 int stopNewState = 0;
 int stopOldState = 0;
 
+volatile long timeOfFirstClock = 0;
+volatile long timeOfLastClock = 0;
+volatile long timesClocked = 0;
+volatile long lastPulseInterval = 0;
+volatile long minimumPulseInterval = 200000;
+int bpm = 0;
+
+
 // Start the slave MIDI device
 void startClock() {
   if (DEBUG) { Serial.println("------ START CLOCK -------"); }
-  Serial.write(MIDI_START);
   started = true;
+  timesClocked = 0; // reset the number of trigger 'timesClocked' the circadian has sent
+  Serial.write(MIDI_START);
 }
+
 
 // Stop the slave MIDI device
 void stopClock() {
   if (DEBUG) { Serial.println("------ STOP CLOCK -------"); }
   Serial.write(MIDI_STOP);
   started = false;
+  timesClocked = 0; // reset the number of trigger 'timesClocked' the circadian has sent
 }
 
 
+
+
+
+void detectTempo() {
+
+  if (timesClocked % 4 == 1) {
+
+    long now = micros();
+    long newPulseInterval = now - timeOfLastClock;
+    timeOfLastClock = now;
+
+    if (newPulseInterval != lastPulseInterval) {
+      Timer1.setPeriod(newPulseInterval / PPQ);
+    }
+
+    lastPulseInterval = newPulseInterval;
+  }
+
+  timesClocked++;
+}
+
 // Interupt Callback Function
 void sendClockPulse() {
-  step += 1;
-  if (step % 4 == 1) {
-    // for (size_t i = 0; i < 24; i++) {
-    //   Serial.write(MIDI_CLOCK);
-    // }
-    // MIDI.sendTimeCodeQuarterFrame(DataByte inTypeNibble, DataByte inValuesNibble);
-  }
+  Serial.write(MIDI_CLOCK);
 }
 
 
@@ -98,6 +119,14 @@ void setup() {
   } else {
     Serial.begin(9600);
   }
+
+
+  // DIGITAL PIN 2 is used for detecting tempo via an interrupt
+  attachInterrupt(digitalPinToInterrupt(2), detectTempo, FALLING);
+
+
+  Timer1.initialize(500000); // initialize @ 120 BPM
+  Timer1.attachInterrupt(sendClockPulse);
 
   io.begin(IO_ADDR);
 
@@ -112,6 +141,10 @@ void setup() {
     }
   }
 
+  // MIDI start stop buttons
+  io.pinMode(MIDI_START_PIN, INPUT);
+  io.pinMode(MIDI_STOP_PIN, INPUT);
+
   // INIT TRIGGER INPUTS
   for (uint8_t i = 0; i < triggerInputCount; i++) {
     pinMode(trigger_input_pins[i], INPUT);
@@ -123,6 +156,14 @@ void setup() {
 
 
 void loop() {
+
+  if (io.digitalRead(MIDI_START_PIN) == HIGH && !started) {
+    startClock();
+  }
+
+  if (io.digitalRead(MIDI_STOP_PIN) == HIGH && started) {
+    stopClock();
+  }
 
   long newEncoderPos = encoder.read();
 

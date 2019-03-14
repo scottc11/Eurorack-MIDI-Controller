@@ -1,32 +1,31 @@
 
-### getting the interval between pin inputs.
+# NOTES:
+
 
 ```
-new_state = digitalRead(4);
-// one step == one 16th note.  4 steps = 1 quarter note.
-if (new_state != old_state) {
+1000 microseconds == 1 millisecond
+```
+```
+1000 milliseconds == 1 second
+```
+```
+60 seconds == 1 minute
+```
 
-  // when input goes LOW, start the timer
-  if (new_state == LOW && timerRunning == 0) {
-    startTime = millis();
-    timerRunning = 1;
-  }
 
-  // when input goes HIGH, stop the timer
-  if (new_state == HIGH && timerRunning == 1) {
-    endTime = millis();
-    timerRunning = 0;
-    duration = endTime - startTime;
+### formula to calculate the interval at which to send PPQ (pulse per quarter-note)
+```
+interval = (currentTime - timeOfLastRcordedClock) / PPQ
+```
 
-    step += 1;
+#### example:
+```
+interval = (1000000 - 500000) / 24
+```
 
-    if (DEBUG) {
-      Serial.println(duration);Serial.print("   ::::    ");
-      Serial.print(startTime);Serial.print("   ::::    ");
-      Serial.print(endTime);Serial.print("   ::::    ");
-    }
+If the BPM is 120 then the average interval between quarter notes will be `500000` microseconds
 
-  }
-  old_state = new_state;
-}
+If we want to send 24 pulses per quarter-note (PPQ) then the formula for the interval between pulses (in microseconds) would look like:
+```
+500000 / 24 = 20833.333333
 ```

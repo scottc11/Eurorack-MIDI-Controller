@@ -3,3 +3,7 @@
 .piolibdeps
 .clang_complete
 .gcc-flags.json
+*.s#1
+*.s#2
+*.s#3
+*.s#4
